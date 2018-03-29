@@ -2,11 +2,10 @@
 
 ![Vimify](https://raw.githubusercontent.com/HendrikPetertje/vimify/master/example.png)
 
-[vimify](https://github.com/Hendrikpetertje/vimify) is a plugin for [Vim](https://github.com/vim/vim) 
-origionally inspired by [MuAnsari96](https://github.com/MuAnsari96/vimify).
+[vimify](https://github.com/mattpenney89/vimify) is a plugin for [Vim](https://github.com/vim/vim) 
+origionally inspired by [MuAnsari96](https://github.com/MuAnsari96/vimify) and [HendrikPeterje](https://github.com/HendrikPetertje/vimify).
 It provides a simple Spotify integration within Vim to search and play music on
-OSX. This version of vimify uses AppleScript to talk with spotify.
-Just make sure you have Spotify running somewhere and the plugin should work.
+Linux. Just make sure you have Spotify running somewhere and the plugin should work.
 
 For the search functions you will need to follow the new instructions in the setup
 part of this readme. Linux support trough Dbus / some code cleaning is underway,
@@ -54,8 +53,6 @@ And you'll be good to go! Once help tags are generated, you can just run `:help 
 
 ## Roadmap
 - Clean up the code and break things apart to their own sections / files
-- Re-add Linux integration
-- Add previous / next controls
 - Instead of making a file that opens as an interface, 
   push the whole thing to `:copen` (need to dig in some literature for that).
 - Make a setup interface that helps new users create a `Authorisation: Basic`
