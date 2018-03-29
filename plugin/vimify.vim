@@ -91,6 +91,29 @@ subprocess.call(['dbus-send',
 endpython
 endfunction
 
+
+function! s:Next()
+python3 << endpython
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.Next'], 
+                 stdout=open(os.devnull, 'wb'))
+endpython
+endfunction
+
+function! s:Previous()
+python3 << endpython
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.Previous'], 
+                 stdout=open(os.devnull, 'wb'))
+endpython
+endfunction
+
 " *************************************************************************** "
 " ***********************      SpotfyAPI wrappers      ********************** "
 " *************************************************************************** "
@@ -181,6 +204,8 @@ command!            Spotify     call s:Toggle()
 command!            SpToggle    call s:Toggle()
 command!            SpPause     call s:Pause()
 command!            SpPlay      call s:Play()
+command!            SpNext      call s:Next()
+command!            SpPrevious  call s:Previous()
 command!            SpSelect    call s:SelectSong()
 command! -nargs=1   SpSearch    call s:SearchTrack(<f-args>)
 
