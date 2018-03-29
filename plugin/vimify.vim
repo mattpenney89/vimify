@@ -11,25 +11,25 @@ if exists('g:vimifyInited')
 endif
 let g:vimifyInited = 0
 
-python << endpython
+python3 << endpython
 import subprocess
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 
 IDs = []
 ListedElements = []
 
 def populate(track, albumName=None, albumIDNumber=None):
-    name = track["name"].encode('ascii', 'ignore').replace("'", "")
+    name = track["name"].replace("'", "")
     uri = track["uri"][14:]
 
-    artist = track["artists"][0]["name"].encode('ascii', 'ignore').replace("'", "")
+    artist = track["artists"][0]["name"].replace("'", "")
     artistID = track["artists"][0]["id"]
 
     album, albumID = albumName, albumIDNumber
     if album is None or albumID is None:
-        album = track["album"]["name"].encode('ascii', 'ignore').replace("'", "")
+        album = track["album"]["name"].replace("'", "")
         albumID = track["album"]["id"]
 
     info = {"track": name, "artist": artist, "album": album}
@@ -45,61 +45,48 @@ endpython
 " *************************************************************************** "
 
 function! s:Play()
-python << endpython
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "Spotify" to play'],
+python3 << endpython
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.Play'], 
                  stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
 function! s:Pause()
-python << endpython
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "Spotify" to pause'],
+python3 << endpython
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.Pause'], 
                  stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
 function! s:Toggle()
-python << endpython
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "Spotify" to playpause'],
+python3 << endpython
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.PlayPause'], 
                  stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
 function! s:LoadTrack(track)
 call s:Pause()
-python << endpython
+python3 << endpython
 import vim
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "spotify" to play track "spotify:track:'+vim.eval("a:track")+'"'],
-                 stdout=open(os.devnull, 'wb'))
-endpython
-endfunction
-
-function! s:LoadAlbum(album)
-call s:Pause()
-python << endpython
-import vim
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "spotify" to play track "spotify:album:'+vim.eval("a:album")+'"'],
-                 stdout=open(os.devnull, 'wb'))
-endpython
-endfunction
-
-function! s:LoadArtist(artist)
-call s:Pause()
-python << endpython
-import vim
-subprocess.call(['osascript',
-                 '-e'
-                 'tell app "spotify" to play track "spotify:artist:'+vim.eval("a:artist")+'"'],
+subprocess.call(['dbus-send',
+                 '--print-reply', 
+                 '--dest=org.mpris.MediaPlayer2.spotify', 
+                 '/org/mpris/MediaPlayer2', 
+                 'org.mpris.MediaPlayer2.Player.OpenUri',
+                 'string:spotify:track:'+vim.eval("a:track")], 
                  stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
@@ -109,20 +96,20 @@ endfunction
 " *************************************************************************** "
 
 function! s:SearchTrack(query)
-python << endpython
+python3 << endpython
 import vim
 
 auth_url = "https://accounts.spotify.com/api/token"
-auth_req = urllib2.Request(auth_url, "grant_type=client_credentials",)
+auth_req = urllib.request.Request(auth_url, "grant_type=client_credentials".encode('ascii'),)
 auth_req.add_header('Authorization', "Basic {}".format(vim.eval("g:spotify_token")))
-auth_resp = urllib2.urlopen(auth_req)
+auth_resp = urllib.request.urlopen(auth_req)
 auth_code = json.loads(auth_resp.read())["access_token"]
 
 search_query = vim.eval("a:query").replace(' ', '+')
 url = "https://api.spotify.com/v1/search?q={}&type=track".format(search_query)
-req = urllib2.Request(url,)
+req = urllib.request.Request(url,)
 req.add_header('Authorization', "Bearer {}".format(auth_code))
-resp = urllib2.urlopen(req)
+resp = urllib.request.urlopen(req)
 j = json.loads(resp.read())["tracks"]["items"]
 if len(j) is not 0:
   IDs = []
@@ -149,7 +136,7 @@ function! s:VimifySearchBuffer(query, type)
     call append(line('$'), "--------------------------------------------------
                            \------------------------------------------------")
 
-python << endpython
+python3 << endpython
 import vim
 for element in ListedElements:
     row = "{:<45}  {:<20}  {:<}".format(element["track"][:45], element["artist"][:20], element["album"])
@@ -169,7 +156,7 @@ endfunction
 function! s:SelectSong()
    let l:row = getpos('.')[1]-5
    let l:col = getpos('.')[2]
-python << endpython
+python3 << endpython
 import vim
 row = int(vim.eval("l:row"))
 col = int(vim.eval("l:col"))
