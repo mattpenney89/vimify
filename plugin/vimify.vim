@@ -14,8 +14,11 @@ let g:vimifyInited = 0
 python3 << endpython
 import subprocess
 import os
+import platform
 import urllib.request, urllib.error, urllib.parse
 import json
+
+osSystem = platform.system()
 
 IDs = []
 ListedElements = []
@@ -46,34 +49,87 @@ endpython
 
 function! s:Play()
 python3 << endpython
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.Play'], 
-                 stdout=open(os.devnull, 'wb'))
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "Spotify" to play'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.Play'],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
 function! s:Pause()
 python3 << endpython
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.Pause'], 
-                 stdout=open(os.devnull, 'wb'))
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "Spotify" to pause'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.Pause'],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
 function! s:Toggle()
 python3 << endpython
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.PlayPause'], 
-                 stdout=open(os.devnull, 'wb'))
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "Spotify" to playpause'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.PlayPause'],
+                   stdout=open(os.devnull, 'wb'))
+endpython
+endfunction
+
+
+function! s:Next()
+python3 << endpython
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "Spotify" to next track'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.Next'],
+                   stdout=open(os.devnull, 'wb'))
+endpython
+endfunction
+
+function! s:Previous()
+python3 << endpython
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "Spotify" to previous track'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.Previous'],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
@@ -81,36 +137,59 @@ function! s:LoadTrack(track)
 call s:Pause()
 python3 << endpython
 import vim
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.OpenUri',
-                 'string:spotify:track:'+vim.eval("a:track")], 
-                 stdout=open(os.devnull, 'wb'))
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "spotify" to play track "spotify:track:'+vim.eval("a:track")+'"'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.OpenUri',
+                   'string:spotify:track:'+vim.eval("a:track")],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
-
-function! s:Next()
+function! s:LoadAlbum(album)
+call s:Pause()
 python3 << endpython
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.Next'], 
-                 stdout=open(os.devnull, 'wb'))
+import vim
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "spotify" to play track "spotify:album:'+vim.eval("a:album")+'"'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.OpenUri',
+                   'string:spotify:album:'+vim.eval("a:album")],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
-function! s:Previous()
+function! s:LoadArtist(artist)
+call s:Pause()
 python3 << endpython
-subprocess.call(['dbus-send',
-                 '--print-reply', 
-                 '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 
-                 'org.mpris.MediaPlayer2.Player.Previous'], 
-                 stdout=open(os.devnull, 'wb'))
+import vim
+if osSystem == 'Darwin':
+  subprocess.call(['osascript',
+                   '-e'
+                   'tell app "spotify" to play track "spotify:artist:'+vim.eval("a:artist")+'"'],
+                   stdout=open(os.devnull, 'wb'))
+elif osSystem == 'Linux' or osSystem == "Linux2":
+  subprocess.call(['dbus-send',
+                   '--print-reply',
+                   '--dest=org.mpris.MediaPlayer2.spotify',
+                   '/org/mpris/MediaPlayer2',
+                   'org.mpris.MediaPlayer2.Player.OpenUri',
+                   'string:spotify:artist:'+vim.eval("a:artist")],
+                   stdout=open(os.devnull, 'wb'))
 endpython
 endfunction
 
@@ -123,7 +202,8 @@ python3 << endpython
 import vim
 
 auth_url = "https://accounts.spotify.com/api/token"
-auth_req = urllib.request.Request(auth_url, "grant_type=client_credentials".encode('ascii'),)
+auth_req = urllib.request.Request(auth_url,
+"grant_type=client_credentials".encode('ascii'),)
 auth_req.add_header('Authorization', "Basic {}".format(vim.eval("g:spotify_token")))
 auth_resp = urllib.request.urlopen(auth_req)
 auth_code = json.loads(auth_resp.read())["access_token"]
@@ -187,14 +267,17 @@ if row >= 0:
     if col < 48:
         uri = str(IDs[row]["uri"])
         vim.command('call s:LoadTrack("{}")'.format(uri))
+        vim.command("echo 'Playing Track'")
     elif col < 70:
         artistID = str(IDs[row]["artistID"])
         artist = str(ListedElements[row]["artist"])
         vim.command('call s:LoadArtist("{}")'.format(artistID))
+        vim.command("echo 'Playing Artist'")
     else:
         albumID = str(IDs[row]["albumID"])
         album = str(ListedElements[row]["album"])
         vim.command('call s:LoadAlbum("{}")'.format(albumID))
+        vim.command("echo 'Playing Album'")
 endpython
 endfunction
 " *************************************************************************** "
